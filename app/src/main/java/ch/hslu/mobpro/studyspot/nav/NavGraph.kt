@@ -2,6 +2,7 @@ package ch.hslu.mobpro.studyspot.nav
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -9,9 +10,14 @@ import androidx.navigation.compose.*
 
 import ch.hslu.mobpro.studyspot.ui.auth.LoginScreen
 import ch.hslu.mobpro.studyspot.ui.auth.RegisterScreen
+import ch.hslu.mobpro.studyspot.viewmodel.AuthViewModel
 
 @Composable
-fun NavGraph(navController: NavHostController = rememberNavController()) {
+fun NavGraph(
+    navController: NavHostController = rememberNavController()
+) {
+    val authViewModel: AuthViewModel = hiltViewModel()
+
     NavHost(navController, startDestination = "login") {
         composable("login") {
             LoginScreen(
@@ -33,13 +39,11 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
                 onRegisterClick = { name, email, password ->
                     authViewModel.register(name, email, password,
                         onSuccess = {
-                            // Navigate back to login screen after successful registration
                             navController.navigate("login") {
                                 popUpTo("login") { inclusive = true }
                             }
                         },
                         onError = { error ->
-                            // Show error message
                             Log.e("Register", error)
                         }
                     )

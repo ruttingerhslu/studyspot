@@ -1,15 +1,18 @@
 package ch.hslu.mobpro.studyspot.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ch.hslu.mobpro.studyspot.data.local.AppDatabase
+import ch.hslu.mobpro.studyspot.data.local.UserDao
 import ch.hslu.mobpro.studyspot.data.model.User
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AuthViewModel(application: Application) : AndroidViewModel(application) {
-    private val userDao = AppDatabase.getDatabase(application).userDao()
-
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val userDao: UserDao
+) : ViewModel()
+{
     fun register(name: String, email: String, password: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
@@ -24,7 +27,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun login(email: String, password: String, onSuccess: (User) -> Unit, onError: (Any?) -> Unit) {
         viewModelScope.launch {
             val user = userDao.login(email, password)
-            if (user != null) onSuccess(user) else onError()
+            if (user != null) onSuccess(user) else onError("Couldn't authenticate user")
         }
     }
 }
