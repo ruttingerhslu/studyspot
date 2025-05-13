@@ -1,14 +1,17 @@
 package ch.hslu.mobpro.studyspot.nav
 
 import android.util.Log
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.*
+import ch.hslu.mobpro.studyspot.data.model.User
 
 import ch.hslu.mobpro.studyspot.ui.auth.LoginScreen
 import ch.hslu.mobpro.studyspot.ui.auth.RegisterScreen
+import ch.hslu.mobpro.studyspot.ui.profile.ProfileScreen
 import ch.hslu.mobpro.studyspot.viewmodel.AuthViewModel
 
 @Composable
@@ -23,6 +26,7 @@ fun NavGraph(
                 onLoginClick = { email, password ->
                     authViewModel.login(email, password,
                         onSuccess = { user ->
+                            authViewModel.setCurrentUser(user)
                             navController.navigate("profile")
                         },
                         onError = {
@@ -49,6 +53,9 @@ fun NavGraph(
                 },
                 onLoginNavigate = { navController.navigate("login") }
             )
+        }
+        composable("profile") {
+            ProfileScreen(authViewModel = authViewModel)
         }
     }
 }
