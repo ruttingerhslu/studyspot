@@ -1,10 +1,13 @@
 package ch.hslu.mobpro.studyspot.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.hslu.mobpro.studyspot.data.local.UserDao
 import ch.hslu.mobpro.studyspot.data.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -13,6 +16,13 @@ class AuthViewModel @Inject constructor(
     private val userDao: UserDao
 ) : ViewModel()
 {
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User?> = _currentUser
+
+    fun setCurrentUser(user: User) {
+        _currentUser.value = user
+    }
+
     fun register(name: String, email: String, password: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
@@ -24,10 +34,17 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun login(email: String, password: String, onSuccess: (User) -> Unit, onError: (Any?) -> Unit) {
+    fun login(email: String, password: String, onSuccess: (User) -> Unit, onError: () -> Unit) {
         viewModelScope.launch {
+            Log.d("Login", "Attempting login for $email")
             val user = userDao.login(email, password)
-            if (user != null) onSuccess(user) else onError("Couldn't authenticate user")
+            if (user != null) {
+                Log.d("Login", "Login successful for ${user.email}")
+                onSuccess(user)
+            } else {
+                Log.e("Login", "Login failed: user not found")
+                onError()
+            }
         }
     }
 }
