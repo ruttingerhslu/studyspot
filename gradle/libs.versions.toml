@@ -1,16 +1,34 @@
 [versions]
-agp = "8.8.1"
+agp = "8.8.2"
 kotlin = "2.0.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.7"
+lifecycleRuntimeKtx = "2.9.0"
 activityCompose = "1.10.1"
-composeBom = "2024.04.01"
+composeBom = "2025.05.00"
+composeNavigation = "2.9.0"
+navigationRuntimeKtx = "2.9.0"
+composeViewModel = "2.9.0"
+kotlinxSerialization = "1.6.3"
+retrofit = "2.9.0"
+retrofitKotlinxSerializationConverter ="1.0.0"
+okHttp = "4.12.0"
+coil = "3.0.4"
+dataStorePreferences = "1.1.6"
+coroutinesTest = "1.10.1"
+mockito = "5.4.0"
+roomKtx = "2.7.1"
+turbine = "1.2.0"
+hilt = "2.51.1"
+hiltNnavigation = "1.2.0"
+room = "2.7.1"
+roomRuntimeAndroid = "2.7.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -24,9 +42,28 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigation" }
+androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
+androidx-compose-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "composeViewModel" }
+android-kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-kotlinx-serialization-converter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "retrofitKotlinxSerializationConverter" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okHttp" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+androidx-data-store-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStorePreferences"}
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt"}
+dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt"}
+androidx-hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNnavigation"}
+androidx-room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "roomRuntimeAndroid" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin"}
+dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt"}
