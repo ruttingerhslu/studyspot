@@ -47,4 +47,15 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateUserProfile(name: String, email: String, location: String) {
+        viewModelScope.launch {
+            val user = currentUser.value
+            if (user != null) {
+                val updatedUser = user.copy(name = name, email = email, location = location)
+                userDao.updateUser(updatedUser)
+                _currentUser.value = updatedUser
+            }
+        }
+    }
 }
