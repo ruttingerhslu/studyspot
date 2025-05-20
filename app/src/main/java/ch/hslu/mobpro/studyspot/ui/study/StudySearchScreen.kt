@@ -16,8 +16,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -48,6 +49,7 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
     val studySpots by studySpotViewModel.studySpots.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var showOnlyFree by remember { mutableStateOf(false) }
+    var showOnlyGroupWork by remember { mutableStateOf(false) }
     var isSearchActive by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
@@ -61,7 +63,8 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
                     spot.location.contains(searchQuery, ignoreCase = true)
         }
         val matchesFreeFilter = if (showOnlyFree) spot.isFree else true
-        matchesSearch && matchesFreeFilter
+        val matchesGroupWorkFilter = if (showOnlyGroupWork) spot.isGroupWorkAllowed else true
+        matchesSearch && matchesFreeFilter && matchesGroupWorkFilter
     }
 
     val freeSpots = filteredSpots.filter { it.isFree }
@@ -89,24 +92,16 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
             active = isSearchActive,
             onActiveChange = { isActive ->
                 isSearchActive = isActive
-                if (!isActive && searchQuery.isNotBlank()) {
-                } else if (!isActive && searchQuery.isBlank()) {
+                if (!isActive && searchQuery.isBlank()) {
                     searchQuery = ""
                 }
             },
             placeholder = { Text("Search for study spots...") },
-            /*leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search"
-                )
-            },*/
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
                     modifier = Modifier.clickable {
-                        showOnlyFree = !showOnlyFree
                         isSearchActive = false
                         focusManager.clearFocus()
                     }
@@ -116,7 +111,6 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
-            // Search suggestions
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -148,10 +142,32 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
             FilterChip(
                 selected = showOnlyFree,
                 onClick = { showOnlyFree = !showOnlyFree },
-                label = { Text("Free") }
+                label = { Text("Free") },
+                leadingIcon =
+                {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Is Free",
+                    )
+                }
             )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            FilterChip(
+                selected = showOnlyGroupWork,
+                onClick = { showOnlyGroupWork = !showOnlyGroupWork },
+                label = { Text("Group Work") },
+                leadingIcon =
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Face,
+                            contentDescription = "Group Work Allowed",
+                        )
+                    })
         }
 
+        // Results count
         Text(
             text = "${filteredSpots.size} study spots found",
             style = MaterialTheme.typography.bodyMedium,
@@ -159,6 +175,7 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
             modifier = Modifier.padding(vertical = 4.dp)
         )
 
+        // Free spots section
         if (freeSpots.isNotEmpty()) {
             Text(
                 text = "Free",
@@ -224,7 +241,7 @@ fun StudySpotItem(spot: StudySpot) {
                 .padding(4.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.Person,
+                imageVector = Icons.Default.Face,
                 contentDescription = if (spot.isGroupWorkAllowed) "Group Work Enabled" else "Group Work Disabled",
                 tint = Color.White
             )
@@ -232,10 +249,28 @@ fun StudySpotItem(spot: StudySpot) {
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Text(
-            text = spot.name,
-            style = MaterialTheme.typography.bodyLarge
-        )
+        Column {
+            Text(
+                text = spot.name,
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            //Maybe a small text for indication about the group work?
+            /*
+            if (spot.isGroupWorkAllowed) {
+                Text(
+                    text = "Group work allowed",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                Text(
+                    text = "Group work not allowed",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }*/
+        }
 
         Spacer(modifier = Modifier.weight(1f))
 
