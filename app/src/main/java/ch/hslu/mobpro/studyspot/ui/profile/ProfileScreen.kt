@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -29,9 +30,13 @@ import androidx.compose.ui.unit.dp
 import ch.hslu.mobpro.studyspot.viewmodel.AuthViewModel
 import coil3.compose.rememberAsyncImagePainter
 import androidx.compose.runtime.*
+import androidx.navigation.NavController
 
 @Composable
-fun ProfileScreen(authViewModel: AuthViewModel) {
+fun ProfileScreen(
+    authViewModel: AuthViewModel,
+    navController: NavController
+) {
     val user by authViewModel.currentUser.collectAsState()
     var isEditing by remember { mutableStateOf(false) }
 
@@ -105,9 +110,21 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                 Text("Favorite Spots:", style = MaterialTheme.typography.titleMedium)
                 Text("No favorite spots yet.")
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Button(onClick = { isEditing = true }) {
                     Text("Edit Profile")
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = {
+                        authViewModel.logout()
+                        navController.navigate("login") {
+                            popUpTo("profile") { inclusive = true }
+                        }},
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Logout")
                 }
             }
         }

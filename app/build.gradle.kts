@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.dagger.hilt)
     kapt(libs.dagger.hilt.compiler)
     implementation(libs.androidx.hilt.navigation)
+    implementation(libs.androidx.material.icons.extended.v1610)
 }
 
 kapt {

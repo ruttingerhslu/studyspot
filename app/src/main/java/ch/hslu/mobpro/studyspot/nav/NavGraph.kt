@@ -3,7 +3,7 @@ package ch.hslu.mobpro.studyspot.nav
 import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -20,20 +20,21 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.*
 
-import ch.hslu.mobpro.studyspot.ui.auth.HomeScreen
 import ch.hslu.mobpro.studyspot.ui.auth.LoginScreen
 import ch.hslu.mobpro.studyspot.ui.auth.RegisterScreen
 import ch.hslu.mobpro.studyspot.ui.profile.ProfileScreen
 import ch.hslu.mobpro.studyspot.ui.study.StudySearchScreen
+import ch.hslu.mobpro.studyspot.ui.community.CommunityScreen
 import ch.hslu.mobpro.studyspot.viewmodel.AuthViewModel
+import ch.hslu.mobpro.studyspot.viewmodel.CommunityViewModel
 import ch.hslu.mobpro.studyspot.viewmodel.StudySpotViewModel
 
 data class BottomNavItem(val route: String, val icon: ImageVector, val label: String)
 
 val bottomNavItems = listOf(
-    BottomNavItem("home", Icons.Default.Home, "Home"),
-    BottomNavItem("profile", Icons.Default.Person, "Profile"),
     BottomNavItem("study", Icons.Default.Search, "Search"),
+    BottomNavItem("contacts", Icons.Default.Groups, "Contacts"),
+    BottomNavItem("profile", Icons.Default.Person, "Profile"),
 )
 
 @Composable
@@ -42,6 +43,7 @@ fun NavGraph(
 ) {
     val authViewModel: AuthViewModel = hiltViewModel()
     val studySpotViewModel: StudySpotViewModel = hiltViewModel()
+    val communityViewModel: CommunityViewModel = hiltViewModel()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -100,7 +102,7 @@ fun NavGraph(
                     onRegisterClick = { name, email, password ->
                         authViewModel.register(name, email, password,
                             onSuccess = {
-                                navController.navigate("login") {
+                                navController.navigate("profile") {
                                     popUpTo("register") { inclusive = true }
                                 }
                             },
@@ -113,9 +115,9 @@ fun NavGraph(
                 )
             }
 
-            composable("home") { HomeScreen() }
             composable("study") { StudySearchScreen(studySpotViewModel) }
-            composable("profile") { ProfileScreen(authViewModel) }
+            composable("contacts") {CommunityScreen(authViewModel, communityViewModel) }
+            composable("profile") { ProfileScreen(authViewModel, navController) }
         }
     }
 }
