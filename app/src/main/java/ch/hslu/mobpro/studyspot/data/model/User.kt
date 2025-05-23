@@ -10,4 +10,5 @@ data class User(
     val password: String,
     val location: String? = null,
     val profileImageUrl: String? = null,
+    val contacts: List<String> = emptyList()
 )

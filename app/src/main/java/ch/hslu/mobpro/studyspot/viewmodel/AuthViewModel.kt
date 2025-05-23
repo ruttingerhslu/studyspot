@@ -26,7 +26,9 @@ class AuthViewModel @Inject constructor(
     fun register(name: String, email: String, password: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                userDao.registerUser(User(email, name, password))
+                val newUser = User(name = name, email = email, password = password)
+                userDao.registerUser(newUser)
+                setCurrentUser(newUser)
                 onSuccess()
             } catch (e: Exception) {
                 onError("User already exists or registration failed")
@@ -45,6 +47,12 @@ class AuthViewModel @Inject constructor(
                 Log.e("Login", "Login failed: user not found")
                 onError()
             }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            _currentUser.value = null
         }
     }
 
