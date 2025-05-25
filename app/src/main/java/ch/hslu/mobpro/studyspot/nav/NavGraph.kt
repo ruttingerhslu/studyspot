@@ -3,7 +3,7 @@ package ch.hslu.mobpro.studyspot.nav
 import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -33,7 +33,7 @@ data class BottomNavItem(val route: String, val icon: ImageVector, val label: St
 
 val bottomNavItems = listOf(
     BottomNavItem("study", Icons.Default.Search, "Search"),
-    BottomNavItem("contacts", Icons.Default.Groups, "Contacts"),
+    BottomNavItem("contacts", Icons.Default.Add, "Contacts"),
     BottomNavItem("profile", Icons.Default.Person, "Profile"),
 )
 
@@ -59,7 +59,7 @@ fun NavGraph(
                             onClick = {
                                 if (currentRoute != item.route) {
                                     navController.navigate(item.route) {
-                                        popUpTo("home") { saveState = true }
+                                        popUpTo("profile") { saveState = true }
                                         launchSingleTop = true
                                         restoreState = true
                                     }

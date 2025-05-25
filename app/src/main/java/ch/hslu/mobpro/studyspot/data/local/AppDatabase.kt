@@ -7,7 +7,7 @@ import androidx.room.TypeConverters
 import ch.hslu.mobpro.studyspot.data.model.User
 
 @TypeConverters(Converters::class)
-@Database(entities = [User::class], version = 1, exportSchema = false)
+@Database(entities = [User::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
 }
