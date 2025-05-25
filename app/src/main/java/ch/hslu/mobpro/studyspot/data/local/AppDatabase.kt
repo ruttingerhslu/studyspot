@@ -5,11 +5,17 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import ch.hslu.mobpro.studyspot.data.model.User
+import ch.hslu.mobpro.studyspot.data.model.StudySpot
 
 @TypeConverters(Converters::class)
-@Database(entities = [User::class], version = 2, exportSchema = false)
+@Database(
+    entities = [User::class, StudySpot::class],
+    version = 3,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
+    abstract fun studySpotDao(): StudySpotDao
 }
 
 class Converters {

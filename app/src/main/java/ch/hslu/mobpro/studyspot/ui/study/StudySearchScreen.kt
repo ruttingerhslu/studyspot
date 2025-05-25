@@ -115,7 +115,7 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(
-                    listOf("Suurstoffi 1A", "Suurstoffi 2B", "Bibliothek", "Computer Lab")
+                    listOf("Suurstoffi 1A", "Suurstoffi 2B", "Library", "Computer Lab")
                 ) { suggestion ->
                     Text(
                         text = suggestion,
