@@ -14,17 +14,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,25 +41,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ch.hslu.mobpro.studyspot.data.model.StudySpot
 import ch.hslu.mobpro.studyspot.viewmodel.StudySpotViewModel
+import ch.hslu.mobpro.studyspot.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
+fun StudySearchScreen(
+    studySpotViewModel: StudySpotViewModel,
+    authViewModel: AuthViewModel
+) {
     val studySpots by studySpotViewModel.studySpots.collectAsState()
+    val currentUser by authViewModel.currentUser.collectAsState()
+
     var searchQuery by remember { mutableStateOf("") }
     var showOnlyFree by remember { mutableStateOf(false) }
     var showOnlyGroupWork by remember { mutableStateOf(false) }
-    var isSearchActive by remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(Unit) {
         studySpotViewModel.fetchStudySpots()
     }
+
+    val favoriteSpotIds = currentUser?.favoriteStudySpotIds ?: emptyList()
 
     val filteredSpots = studySpots.filter { spot ->
         val matchesSearch = if (searchQuery.isBlank()) true else {
@@ -67,8 +76,13 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
         matchesSearch && matchesFreeFilter && matchesGroupWorkFilter
     }
 
-    val freeSpots = filteredSpots.filter { it.isFree }
-    val notFreeSpots = filteredSpots.filter { !it.isFree }
+    val favoriteFilteredSpots = filteredSpots.filter { favoriteSpotIds.contains(it.id) }
+    val nonFavoriteFilteredSpots = filteredSpots.filter { !favoriteSpotIds.contains(it.id) }
+
+    val favoriteFreeSpots = favoriteFilteredSpots.filter { it.isFree }
+    val favoriteNotFreeSpots = favoriteFilteredSpots.filter { !it.isFree }
+    val nonFavoriteFreeSpots = nonFavoriteFilteredSpots.filter { it.isFree }
+    val nonFavoriteNotFreeSpots = nonFavoriteFilteredSpots.filter { !it.isFree }
 
     Column(
         modifier = Modifier
@@ -82,57 +96,33 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        SearchBar(
-            query = searchQuery,
-            onQueryChange = { searchQuery = it },
-            onSearch = {
-                isSearchActive = false
-                focusManager.clearFocus()
-            },
-            active = isSearchActive,
-            onActiveChange = { isActive ->
-                isSearchActive = isActive
-                if (!isActive && searchQuery.isBlank()) {
-                    searchQuery = ""
-                }
-            },
-            placeholder = { Text("Search for study spots...") },
-            trailingIcon = {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            label = { Text("Search for study spots...") },
+            leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    modifier = Modifier.clickable {
-                        isSearchActive = false
-                        focusManager.clearFocus()
-                    }
+                    contentDescription = "Search"
                 )
+            },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { searchQuery = "" }) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "Clear search"
+                        )
+                    }
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(
-                    listOf("Suurstoffi 1A", "Suurstoffi 2B", "Library", "Computer Lab")
-                ) { suggestion ->
-                    Text(
-                        text = suggestion,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                searchQuery = suggestion
-                                isSearchActive = false
-                                focusManager.clearFocus()
-                            }
-                            .padding(16.dp)
-                    )
-                }
-            }
-        }
+                .padding(vertical = 8.dp),
+            singleLine = true
+        )
 
-        // Filter (einfach so filterchips zum draufklicken, ist glaube ich am einfachsten)
+        // Filter chips (is better and easier to use i think honestly)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -143,8 +133,7 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
                 selected = showOnlyFree,
                 onClick = { showOnlyFree = !showOnlyFree },
                 label = { Text("Free") },
-                leadingIcon =
-                {
+                leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Is Free",
@@ -158,16 +147,15 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
                 selected = showOnlyGroupWork,
                 onClick = { showOnlyGroupWork = !showOnlyGroupWork },
                 label = { Text("Group Work") },
-                leadingIcon =
-                    {
-                        Icon(
-                            imageVector = Icons.Default.Face,
-                            contentDescription = "Group Work Allowed",
-                        )
-                    })
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Face,
+                        contentDescription = "Group Work Allowed",
+                    )
+                }
+            )
         }
 
-        // Results count
         Text(
             text = "${filteredSpots.size} study spots found",
             style = MaterialTheme.typography.bodyMedium,
@@ -175,60 +163,96 @@ fun StudySearchScreen(studySpotViewModel: StudySpotViewModel) {
             modifier = Modifier.padding(vertical = 4.dp)
         )
 
-        // Free spots section
-        if (freeSpots.isNotEmpty()) {
-            Text(
-                text = "Free",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (favoriteFilteredSpots.isNotEmpty()) {
+                if (favoriteFreeSpots.isNotEmpty()) {
+                    item {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "Favorites",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Favorites - Free",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
 
-            LazyColumn(
-                modifier = Modifier.weight(1f, false)
-            ) {
-                items(freeSpots) { spot ->
-                    StudySpotItem(spot)
+                items(favoriteFreeSpots) { spot ->
+                    StudySpotItem(spot, isFavorite = true)
                 }
             }
-        }
 
-        if (!showOnlyFree && notFreeSpots.isNotEmpty()) {
-            Text(
-                text = "Not Free",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
 
-            LazyColumn(
-                modifier = Modifier.weight(1f, false)
-            ) {
-                items(notFreeSpots) { spot ->
-                    StudySpotItem(spot)
+            if (nonFavoriteFreeSpots.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Free",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
                 }
             }
-        }
 
-        if (filteredSpots.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No study spots found matching your criteria",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(32.dp)
-                )
+
+            items(nonFavoriteFreeSpots) { spot ->
+                StudySpotItem(spot, isFavorite = false)
+            }
+
+            if (!showOnlyFree && nonFavoriteNotFreeSpots.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Not Free",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+            }
+
+            items(favoriteNotFreeSpots) { spot ->
+                StudySpotItem(spot, isFavorite = true)
+            }
+
+            items(nonFavoriteNotFreeSpots) { spot ->
+                StudySpotItem(spot, isFavorite = false)
+            }
+
+            if (filteredSpots.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No study spots found matching your criteria",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(32.dp)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun StudySpotItem(spot: StudySpot) {
+fun StudySpotItem(spot: StudySpot, isFavorite: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {} // maybe some kind of navigation to a study spot? or maybe its alright like this
+            .clickable { }
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -249,35 +273,49 @@ fun StudySpotItem(spot: StudySpot) {
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = spot.name,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                if (isFavorite) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Favorite",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
             Text(
-                text = spot.name,
-                style = MaterialTheme.typography.bodyLarge
+                text = spot.location,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            //Maybe a small text for indication about the group work?
-            /*
-            if (spot.isGroupWorkAllowed) {
-                Text(
-                    text = "Group work allowed",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                Text(
-                    text = "Group work not allowed",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }*/
+            Row {
+                if (spot.isGroupWorkAllowed) {
+                    Text(
+                        "Group Work",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .background(
+                                MaterialTheme.colorScheme.primaryContainer,
+                                RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
 
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = "View Details",
         )
     }
-    Divider(modifier = Modifier.padding(start = 56.dp))
+    HorizontalDivider(modifier = Modifier.padding(start = 56.dp))
 }

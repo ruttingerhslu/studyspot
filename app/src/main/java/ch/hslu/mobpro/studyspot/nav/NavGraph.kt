@@ -115,7 +115,12 @@ fun NavGraph(
                 )
             }
 
-            composable("study") { StudySearchScreen(studySpotViewModel) }
+            composable("study") {
+                StudySearchScreen(
+                    studySpotViewModel = studySpotViewModel,
+                    authViewModel = authViewModel
+                )
+            }
             composable("contacts") { CommunityScreen(authViewModel, communityViewModel) }
             composable("profile") {
                 ProfileScreen(
