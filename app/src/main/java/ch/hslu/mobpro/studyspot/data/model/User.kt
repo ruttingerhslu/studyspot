@@ -11,5 +11,5 @@ data class User(
     val location: String? = null,
     val profileImageUrl: String? = null,
     val contacts: List<String> = emptyList(),
-    val studySpots: List<String> = emptyList()
+    val favoriteStudySpotIds: List<String> = emptyList()
 )

@@ -10,7 +10,7 @@ import ch.hslu.mobpro.studyspot.data.model.StudySpot
 @TypeConverters(Converters::class)
 @Database(
     entities = [User::class, StudySpot::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
